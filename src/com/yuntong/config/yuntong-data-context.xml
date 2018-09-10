@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.2.xsd
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
+        http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.2.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd"
+       default-lazy-init="true">
+
+    <description>SpringJpa配置</description>
+
+    <context:component-scan base-package="com.yuntong.repository.jpa"/>
+
+    <bean id="propertyConfigurer"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:/com/yuntong/config/yuntong-data-context.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <!-- 指定数据源 -->
+        <property name="dataSource" ref="dataSource"/>
+        <!-- 指定Jpa持久化实现厂商类,这里以Hibernate为例 -->
+        <property name="jpaVendorAdapter" ref="hibernateJpaVendorAdapter"/>
+        <!-- 指定Entity实体类包路径 -->
+        <property name="packagesToScan" >
+            <array>
+                <value>com.yuntong.model</value>
+            </array>
+        </property>
+        <!-- 指定JPA属性；如Hibernate中指定是否显示SQL的是否显示、方言等 -->
+        <property name="jpaProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.Oracle10gDialect</prop>
+                <prop key="hibernate.ejb.naming_strategy">org.hibernate.cfg.ImprovedNamingStrategy</prop>
+                <prop key="hibernate.cache.provider_class">org.hibernate.cache.NoCacheProvider</prop>
+                <prop key="hibernate.show_sql">${yuntong.persistence.showsql}</prop>
+                <prop key="hibernate.format_sql">true</prop>
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+            </props>
+        </property>
+    </bean>
+
+    <jpa:repositories base-package="com.yuntong.repository.jpa"  transaction-manager-ref="transactionManager" entity-manager-factory-ref="entityManagerFactory"/>
+
+    <bean id="hibernateJpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"/>
+
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory"/>
+    </bean>
+
+    <tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true" />
+
+    <bean id="dataSource" class="org.apache.tomcat.jdbc.pool.DataSource" init-method="getInitSQL" destroy-method="close">
+        <property name="driverClassName" value="${yuntong.persistence.driver}"/>
+        <property name="url" value="${yuntong.persistence.url}"/>
+        <property name="username" value="${yuntong.persistence.username}"/>
+        <property name="password" value="${yuntong.persistence.password}"/>
+        <property name="defaultAutoCommit" value="false"/>
+        <property name="initialSize" value="${yuntong.persistence.pool.minSize}"/>
+        <property name="minIdle" value="${yuntong.persistence.pool.minSize}"/>
+        <property name="maxActive" value="${yuntong.persistence.pool.maxSize}"/>
+        <property name="maxIdle" value="${yuntong.persistence.pool.maxSize}"/>
+        <property name="maxWait" value="${yuntong.persistence.pool.blockingTimeout}"/>
+        <property name="jdbcInterceptors" value="ConnectionState;StatementFinalizer"/>
+        <property name="validationQuery" value="${yuntong.persistence.pool.validationQuery}"/>
+        <property name="validationInterval" value="30000"/>
+        <property name="logAbandoned" value="true"/>
+        <property name="testOnBorrow" value="true"/>
+    </bean>
+
+    <aop:aspectj-autoproxy />
+
+
+    <bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+        <property name="configLocations">
+            <list>
+                <value>classpath:/com/yuntong/config/sqlmap-config-oracle.xml</value>
+            </list>
+        </property>
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+</beans>

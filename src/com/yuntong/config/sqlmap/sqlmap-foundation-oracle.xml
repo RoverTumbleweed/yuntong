@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Foundation">
+
+	<typeAlias alias="user" type="com.yuntong.model.User"/>
+     
+     <select id="findUserByUsername" resultClass= "user" parameterClass="String">
+     	 SELECT ID,USERNAME,NAME,PASSWORD FROM YUNTONG_USER  WHERE  userName = #value#
+     </select>
+     
+     <!-- 如果有多个参数而且类型不一样怎么传呢 -->
+     <insert id="addOne" parameterClass="user">
+	     insert into yuntong_user  values (s_yuntong_user.nextval,#name#,#password#,
+	     #username#,#userIdCard#,#userPhone#)
+     </insert>
+</sqlMap>

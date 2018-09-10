@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Configuration status="error">
+
+	<Properties>
+		<Property name="log_home">D:Workspaces/log/yuntong</Property>
+	</Properties>
+	
+    <Appenders>
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%-d{yyyy-MM-dd HH:mm:ss,SSS} [%p] %c{1}%x - %m%n"/>
+        </Console>
+        <RollingRandomAccessFile name="error" fileName="${log_home}/error.log"
+                     filePattern="${log_home}/error.log.%-d{yyyy-MM-dd-HH}">
+            <PatternLayout pattern="%-d{yyyy-MM-dd HH:mm:ss,SSS} %x - %m%n"/>
+            <Policies>
+            	<TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingRandomAccessFile>
+    </Appenders>
+
+    <Loggers>
+        <Root level="info">
+        	<AppenderRef ref="console"/>
+        	<AppenderRef ref="error"/>
+        </Root>
+    </Loggers>
+
+</Configuration>
